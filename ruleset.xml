@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ruleset>
+    <file>src</file>
+    <arg name="extensions" value="php,phpt"/>
+    <arg name="encoding" value="utf-8"/>
+    <arg value="ps"/>
+    <arg name="colors"/>
+    <arg name="basepath" value="./"/>
+    <arg name="parallel" value="16"/>
+
+    <!-- Contributte Coding Standard -->
+    <rule ref="./vendor/contributte/qa/ruleset-7.4.xml"/>
+
+    <!-- Specific rules -->
+    <rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
+        <properties>
+            <property name="rootNamespaces" type="array" value="
+				src=>Adbros\Microsoft,
+			"/>
+        </properties>
+    </rule>
+</ruleset>

@@ -1,0 +1,33 @@
+{
+    "name": "adbros/microsoft",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "microsoft/microsoft-graph": "^2.0.0-RC13",
+        "microsoft/microsoft-graph-core": "@RC"
+    },
+    "require-dev": {
+        "tracy/tracy": "^2.9",
+        "contributte/qa": "^0.2.0",
+        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan-deprecation-rules": "^1.1",
+        "phpstan/phpstan-strict-rules": "^1.5",
+        "phpstan/extension-installer": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Adbros\\Microsoft\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "scripts": {
+        "cs": "phpcs --standard=ruleset.xml",
+        "cs-fix": "phpcbf --standard=ruleset.xml",
+        "phpstan": "phpstan analyse -c phpstan.neon"
+    }
+}
