@@ -1,6 +1,7 @@
 {
     "name": "adbros/microsoft",
-    "type": "project",
+    "type": "library",
+    "license": "MIT",
     "require": {
         "php": ">=7.4",
         "microsoft/microsoft-graph": "^2.0.0-RC13",
