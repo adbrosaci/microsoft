@@ -5,7 +5,10 @@ namespace Adbros\Microsoft;
 use Adbros\Microsoft\Exception\InvalidStateException;
 use Adbros\Microsoft\Exception\NotFoundException;
 use DateTimeImmutable;
+use Microsoft\Graph\Generated\Models\Attendee;
+use Microsoft\Graph\Generated\Models\AttendeeType;
 use Microsoft\Graph\Generated\Models\DateTimeTimeZone;
+use Microsoft\Graph\Generated\Models\EmailAddress;
 use Microsoft\Graph\Generated\Models\Event;
 use Microsoft\Graph\Generated\Models\ItemBody;
 use Microsoft\Graph\Generated\Models\ODataErrors\ODataError;
@@ -36,6 +39,9 @@ class Client
 		$this->clientSecret = $clientSecret;
 	}
 
+	/**
+	 * @param array<string, AttendeeType::REQUIRED|AttendeeType::OPTIONAL|AttendeeType::RESOURCE> $attendeesMails
+	 */
 	public function createOrUpdateEvent(
 		string $userId,
 		string $subject,
@@ -43,7 +49,8 @@ class Client
 		DateTimeImmutable $end,
 		bool $allDay = false,
 		?string $content = null,
-		?string $eventId = null
+		?string $eventId = null,
+		array $attendeesMails = []
 	): string
 	{
 		$event = $this->createEventModel(
@@ -52,6 +59,7 @@ class Client
 			$end,
 			$allDay,
 			$content,
+			$attendeesMails
 		);
 
 		$calendar = $this->getGraphServiceClient()->usersById($userId)->calendar();
@@ -92,12 +100,16 @@ class Client
 		}
 	}
 
+	/**
+	 * @param array<string, AttendeeType::REQUIRED|AttendeeType::OPTIONAL|AttendeeType::RESOURCE> $attendeesMails
+	 */
 	private function createEventModel(
 		string $subject,
 		DateTimeImmutable $start,
 		DateTimeImmutable $end,
 		bool $allDay = false,
-		?string $content = null
+		?string $content = null,
+		array $attendeesMails = []
 	): Event
 	{
 		$event = new Event();
@@ -110,6 +122,22 @@ class Client
 		}
 
 		$event->setBody($body);
+
+		$attendees = [];
+
+		foreach ($attendeesMails as $email => $type) {
+			$attendeeEmail = new EmailAddress();
+			$attendeeEmail->setAddress($email);
+
+			$attendee = new Attendee();
+			$attendee->setEmailAddress($attendeeEmail);
+
+			$attendeeType = new AttendeeType($type);
+			$attendee->setType($attendeeType);
+			$attendees[] = $attendee;
+		}
+
+		$event->setAttendees($attendees);
 
 		$dateFormat = $allDay ? 'Y-m-d' : 'Y-m-d\TH:i';
 
