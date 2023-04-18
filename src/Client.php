@@ -50,7 +50,8 @@ class Client
 		bool $allDay = false,
 		?string $content = null,
 		?string $eventId = null,
-		array $attendeesMails = []
+		array $attendeesMails = [],
+		?string $locationId = null
 	): string
 	{
 		$event = $this->createEventModel(
@@ -59,7 +60,8 @@ class Client
 			$end,
 			$allDay,
 			$content,
-			$attendeesMails
+			$attendeesMails,
+			$locationId
 		);
 
 		$calendar = $this->getGraphServiceClient()->usersById($userId)->calendar();
@@ -109,7 +111,8 @@ class Client
 		DateTimeImmutable $end,
 		bool $allDay = false,
 		?string $content = null,
-		array $attendeesMails = []
+		array $attendeesMails = [],
+		?string $locationId = null
 	): Event
 	{
 		$event = new Event();
@@ -135,6 +138,18 @@ class Client
 			$attendeeType = new AttendeeType($type);
 			$attendee->setType($attendeeType);
 			$attendees[] = $attendee;
+		}
+
+		if ($locationId !== null) {
+			$locationEmail = new EmailAddress();
+			$locationEmail->setAddress($locationId);
+
+			$location = new Attendee();
+			$location->setEmailAddress($locationEmail);
+
+			$attendeeType = new AttendeeType(AttendeeType::RESOURCE);
+			$location->setType($attendeeType);
+			$attendees[] = $location;
 		}
 
 		$event->setAttendees($attendees);
