@@ -8,6 +8,7 @@ $demoSubject = 'fill your subject';
 $demoDescription = 'fill your description, or null';
 $demoStart = (new \DateTimeImmutable())->modify('+5 minutes');
 $demoEnd = $demoStart->modify('+10 minutes');
-$demoAttendees = ['fill your attendee email' => Microsoft\Graph\Generated\Models\AttendeeType::OPTIONAL, 'fill your attendee2 email' => Microsoft\Graph\Generated\Models\AttendeeType::REQUIRED, 'fill your attendee3 email' => Microsoft\Graph\Generated\Models\AttendeeType::REQUIRED, 'fill your attendeeN email' => Microsoft\Graph\Generated\Models\AttendeeType::REQUIRED];
-$demoLocation = 'fill location email';
+$demoRequiredAttendeesEmails = ['fill required attendee email'];
+$demoOptionalAttendeesEmails = ['fill optional attendee email'];
+$demoResourceAttendeesEmails = ['fill resource email, eq. room/location/tools'];
 ?>

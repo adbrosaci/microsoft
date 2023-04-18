@@ -40,7 +40,9 @@ class Client
 	}
 
 	/**
-	 * @param array<string, AttendeeType::REQUIRED|AttendeeType::OPTIONAL|AttendeeType::RESOURCE> $attendeesMails
+	 * @param string[] $requiredAttendeesEmails
+	 * @param string[] $optionalAttendeesEmails
+	 * @param string[] $resourceAttendeesEmails
 	 */
 	public function createOrUpdateEvent(
 		string $userId,
@@ -50,8 +52,9 @@ class Client
 		bool $allDay = false,
 		?string $content = null,
 		?string $eventId = null,
-		array $attendeesMails = [],
-		?string $locationId = null
+		array $requiredAttendeesEmails = [],
+		array $optionalAttendeesEmails = [],
+		array $resourceAttendeesEmails = []
 	): string
 	{
 		$event = $this->createEventModel(
@@ -60,8 +63,9 @@ class Client
 			$end,
 			$allDay,
 			$content,
-			$attendeesMails,
-			$locationId
+			$requiredAttendeesEmails,
+			$optionalAttendeesEmails,
+			$resourceAttendeesEmails
 		);
 
 		$calendar = $this->getGraphServiceClient()->usersById($userId)->calendar();
@@ -103,7 +107,9 @@ class Client
 	}
 
 	/**
-	 * @param array<string, AttendeeType::REQUIRED|AttendeeType::OPTIONAL|AttendeeType::RESOURCE> $attendeesMails
+	 * @param string[] $requiredAttendeesEmails
+	 * @param string[] $optionalAttendeesEmails
+	 * @param string[] $resourceAttendeesEmails
 	 */
 	private function createEventModel(
 		string $subject,
@@ -111,8 +117,9 @@ class Client
 		DateTimeImmutable $end,
 		bool $allDay = false,
 		?string $content = null,
-		array $attendeesMails = [],
-		?string $locationId = null
+		array $requiredAttendeesEmails = [],
+		array $optionalAttendeesEmails = [],
+		array $resourceAttendeesEmails = []
 	): Event
 	{
 		$event = new Event();
@@ -128,28 +135,16 @@ class Client
 
 		$attendees = [];
 
-		foreach ($attendeesMails as $email => $type) {
-			$attendeeEmail = new EmailAddress();
-			$attendeeEmail->setAddress($email);
-
-			$attendee = new Attendee();
-			$attendee->setEmailAddress($attendeeEmail);
-
-			$attendeeType = new AttendeeType($type);
-			$attendee->setType($attendeeType);
-			$attendees[] = $attendee;
+		foreach ($requiredAttendeesEmails as $email) {
+			$attendees[] = $this->createAttendeeModel($email, AttendeeType::REQUIRED);
 		}
 
-		if ($locationId !== null) {
-			$locationEmail = new EmailAddress();
-			$locationEmail->setAddress($locationId);
+		foreach ($optionalAttendeesEmails as $email) {
+			$attendees[] = $this->createAttendeeModel($email, AttendeeType::OPTIONAL);
+		}
 
-			$location = new Attendee();
-			$location->setEmailAddress($locationEmail);
-
-			$attendeeType = new AttendeeType(AttendeeType::RESOURCE);
-			$location->setType($attendeeType);
-			$attendees[] = $location;
+		foreach ($resourceAttendeesEmails as $email) {
+			$attendees[] = $this->createAttendeeModel($email, AttendeeType::RESOURCE);
 		}
 
 		$event->setAttendees($attendees);
@@ -169,6 +164,24 @@ class Client
 		$event->setIsAllDay($allDay);
 
 		return $event;
+	}
+
+	private function createAttendeeModel(string $email, string $type): Attendee
+	{
+		if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+			throw new InvalidStateException(sprintf('Invalid email address "%s"!', $email), 500);
+		}
+
+		$attendeeEmail = new EmailAddress();
+		$attendeeEmail->setAddress($email);
+
+		$attendee = new Attendee();
+		$attendee->setEmailAddress($attendeeEmail);
+
+		$attendeeType = new AttendeeType($type);
+		$attendee->setType($attendeeType);
+
+		return $attendee;
 	}
 
 	private function getGraphServiceClient(): GraphServiceClient
