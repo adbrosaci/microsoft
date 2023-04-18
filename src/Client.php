@@ -5,7 +5,10 @@ namespace Adbros\Microsoft;
 use Adbros\Microsoft\Exception\InvalidStateException;
 use Adbros\Microsoft\Exception\NotFoundException;
 use DateTimeImmutable;
+use Microsoft\Graph\Generated\Models\Attendee;
+use Microsoft\Graph\Generated\Models\AttendeeType;
 use Microsoft\Graph\Generated\Models\DateTimeTimeZone;
+use Microsoft\Graph\Generated\Models\EmailAddress;
 use Microsoft\Graph\Generated\Models\Event;
 use Microsoft\Graph\Generated\Models\ItemBody;
 use Microsoft\Graph\Generated\Models\ODataErrors\ODataError;
@@ -36,6 +39,11 @@ class Client
 		$this->clientSecret = $clientSecret;
 	}
 
+	/**
+	 * @param string[] $requiredAttendeesEmails
+	 * @param string[] $optionalAttendeesEmails
+	 * @param string[] $resourceAttendeesEmails
+	 */
 	public function createOrUpdateEvent(
 		string $userId,
 		string $subject,
@@ -43,7 +51,10 @@ class Client
 		DateTimeImmutable $end,
 		bool $allDay = false,
 		?string $content = null,
-		?string $eventId = null
+		?string $eventId = null,
+		array $requiredAttendeesEmails = [],
+		array $optionalAttendeesEmails = [],
+		array $resourceAttendeesEmails = []
 	): string
 	{
 		$event = $this->createEventModel(
@@ -52,6 +63,9 @@ class Client
 			$end,
 			$allDay,
 			$content,
+			$requiredAttendeesEmails,
+			$optionalAttendeesEmails,
+			$resourceAttendeesEmails
 		);
 
 		$calendar = $this->getGraphServiceClient()->usersById($userId)->calendar();
@@ -92,12 +106,20 @@ class Client
 		}
 	}
 
+	/**
+	 * @param string[] $requiredAttendeesEmails
+	 * @param string[] $optionalAttendeesEmails
+	 * @param string[] $resourceAttendeesEmails
+	 */
 	private function createEventModel(
 		string $subject,
 		DateTimeImmutable $start,
 		DateTimeImmutable $end,
 		bool $allDay = false,
-		?string $content = null
+		?string $content = null,
+		array $requiredAttendeesEmails = [],
+		array $optionalAttendeesEmails = [],
+		array $resourceAttendeesEmails = []
 	): Event
 	{
 		$event = new Event();
@@ -110,6 +132,22 @@ class Client
 		}
 
 		$event->setBody($body);
+
+		$attendees = [];
+
+		foreach ($requiredAttendeesEmails as $email) {
+			$attendees[] = $this->createAttendeeModel($email, AttendeeType::REQUIRED);
+		}
+
+		foreach ($optionalAttendeesEmails as $email) {
+			$attendees[] = $this->createAttendeeModel($email, AttendeeType::OPTIONAL);
+		}
+
+		foreach ($resourceAttendeesEmails as $email) {
+			$attendees[] = $this->createAttendeeModel($email, AttendeeType::RESOURCE);
+		}
+
+		$event->setAttendees($attendees);
 
 		$dateFormat = $allDay ? 'Y-m-d' : 'Y-m-d\TH:i';
 
@@ -126,6 +164,24 @@ class Client
 		$event->setIsAllDay($allDay);
 
 		return $event;
+	}
+
+	private function createAttendeeModel(string $email, string $type): Attendee
+	{
+		if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+			throw new InvalidStateException(sprintf('Invalid email address "%s"!', $email), 500);
+		}
+
+		$attendeeEmail = new EmailAddress();
+		$attendeeEmail->setAddress($email);
+
+		$attendee = new Attendee();
+		$attendee->setEmailAddress($attendeeEmail);
+
+		$attendeeType = new AttendeeType($type);
+		$attendee->setType($attendeeType);
+
+		return $attendee;
 	}
 
 	private function getGraphServiceClient(): GraphServiceClient
