@@ -54,7 +54,8 @@ class Client
 		?string $eventId = null,
 		array $requiredAttendeesEmails = [],
 		array $optionalAttendeesEmails = [],
-		array $resourceAttendeesEmails = []
+		array $resourceAttendeesEmails = [],
+		bool $onlineMeeting = false
 	): string
 	{
 		$event = $this->createEventModel(
@@ -65,7 +66,8 @@ class Client
 			$content,
 			$requiredAttendeesEmails,
 			$optionalAttendeesEmails,
-			$resourceAttendeesEmails
+			$resourceAttendeesEmails,
+			$onlineMeeting
 		);
 
 		$calendar = $this->getGraphServiceClient()->usersById($userId)->calendar();
@@ -119,7 +121,8 @@ class Client
 		?string $content = null,
 		array $requiredAttendeesEmails = [],
 		array $optionalAttendeesEmails = [],
-		array $resourceAttendeesEmails = []
+		array $resourceAttendeesEmails = [],
+		bool $onlineMeeting = false
 	): Event
 	{
 		$event = new Event();
@@ -148,6 +151,8 @@ class Client
 		}
 
 		$event->setAttendees($attendees);
+
+		$event->setIsOnlineMeeting($onlineMeeting);
 
 		$dateFormat = $allDay ? 'Y-m-d' : 'Y-m-d\TH:i';
 
