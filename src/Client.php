@@ -56,7 +56,7 @@ class Client
 		array $optionalAttendeesEmails = [],
 		array $resourceAttendeesEmails = [],
 		bool $onlineMeeting = false
-	): string
+	): Event
 	{
 		$event = $this->createEventModel(
 			$subject,
@@ -89,7 +89,7 @@ class Client
 			throw new InvalidStateException('Event id is empty!', 500);
 		}
 
-		return $response->getId();
+		return $response;
 	}
 
 	public function deleteEvent(

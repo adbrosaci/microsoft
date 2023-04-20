@@ -19,7 +19,9 @@ $client = new Adbros\Microsoft\Client(
     $clientSecret
 );
 
-$client->createOrUpdateEvent($demoUserId, $demoSubject, $demoStart, $demoEnd, false, $demoDescription, null, $demoRequiredAttendeesEmails, $demoOptionalAttendeesEmails, $demoResourceAttendeesEmails, true);
+$event = $client->createOrUpdateEvent($demoUserId, $demoSubject, $demoStart, $demoEnd, false, $demoDescription, null, $demoRequiredAttendeesEmails, $demoOptionalAttendeesEmails, $demoResourceAttendeesEmails, true);
+echo ('Event ID: ' . $event->getId() . PHP_EOL);
+echo('Outlook link: ' . $event->getWebLink() . PHP_EOL);
+echo('Online meeting link: ' . $event->getOnlineMeeting()->getJoinUrl() . PHP_EOL);
 echo 'Now you can find event in your DemoUser – ' . $demoUserId . ' calendar.' . PHP_EOL;
-
 ?>
