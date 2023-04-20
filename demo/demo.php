@@ -19,7 +19,7 @@ $client = new Adbros\Microsoft\Client(
     $clientSecret
 );
 
-$client->createOrUpdateEvent($demoUserId, $demoSubject, $demoStart, $demoEnd, false, $demoDescription, null, $demoRequiredAttendeesEmails, $demoOptionalAttendeesEmails, $demoResourceAttendeesEmails);
+$client->createOrUpdateEvent($demoUserId, $demoSubject, $demoStart, $demoEnd, false, $demoDescription, null, $demoRequiredAttendeesEmails, $demoOptionalAttendeesEmails, $demoResourceAttendeesEmails, true);
 echo 'Now you can find event in your DemoUser – ' . $demoUserId . ' calendar.' . PHP_EOL;
 
 ?>
