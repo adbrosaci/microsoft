@@ -70,16 +70,16 @@ class Client
 			$onlineMeeting
 		);
 
-		$calendar = $this->getGraphServiceClient()->usersById($userId)->calendar();
+		$calendar = $this->getGraphServiceClient()->users()->byUserId($userId)->calendar();
 
 		try {
 			/** @var Event $response */
 			$response = $eventId !== null
-				? $calendar->eventsById($eventId)->patch($event)->wait()
+				? $calendar->events()->byEventId($eventId)->patch($event)->wait()
 				: $calendar->events()->post($event)->wait();
 		} catch (ODataError $e) {
-			if ($e->getResponse() !== null && $e->getResponse()->getStatusCode() === 404) {
-				throw new NotFoundException($e->getResponse()->getReasonPhrase(), 404);
+			if ($e->getResponseStatusCode() === 404) {
+				throw new NotFoundException($e->getMessage(), 404);
 			}
 
 			throw $e;
@@ -98,10 +98,10 @@ class Client
 	): void
 	{
 		try {
-			$this->getGraphServiceClient()->usersById($userId)->calendar()->eventsById($eventId)->delete()->wait();
+			$this->getGraphServiceClient()->users()->byUserId($userId)->calendar()->events()->byEventId($eventId)->delete()->wait();
 		} catch (ODataError $e) {
-			if ($e->getResponse() !== null && $e->getResponse()->getStatusCode() === 404) {
-				throw new NotFoundException($e->getResponse()->getReasonPhrase(), 404);
+			if ($e->getResponseStatusCode() === 404) {
+				throw new NotFoundException($e->getMessage(), 404);
 			}
 
 			throw $e;
