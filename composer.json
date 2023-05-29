@@ -4,7 +4,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.4",
-        "microsoft/microsoft-graph": "^2.0.0-RC13",
+        "microsoft/microsoft-graph": "^2.0.0-RC13 <2.0.0-RC14",
         "microsoft/microsoft-graph-core": "@RC"
     },
     "require-dev": {
