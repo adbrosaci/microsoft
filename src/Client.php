@@ -202,7 +202,7 @@ class Client
 			$authProvider = new PhpLeagueAuthenticationProvider($tokenRequestContext, $scopes);
 			$requestAdapter = new GraphRequestAdapter($authProvider);
 
-			$this->graphServiceClient = new GraphServiceClient($requestAdapter);
+			$this->graphServiceClient = GraphServiceClient::createWithRequestAdapter($requestAdapter);
 		}
 
 		return $this->graphServiceClient;
